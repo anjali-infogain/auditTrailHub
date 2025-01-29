@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // configureAuthentication(app);
 
 // Routes
-// app.use('/audit', isAuthenticated, auditTrailRoutes);
+app.use('/audit', auditTrailRoutes);
 
 app.get('/', (req, res) => res.send('Welcome to AuditTrailHub!'));
 // app.get('/dashboard', isAuthenticated, (req, res) =>

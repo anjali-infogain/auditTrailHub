@@ -1,18 +1,21 @@
 const mongoose = require('mongoose');
 
-const AuditTrailSchema = new mongoose.Schema({
-  user: {
-    type: String,
-    required: true,
+const AuditCycleSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  Name: { type: String, required: true },
+  Description: { type: String },
+  StartDateTime: { type: Date, required: true },
+  EndDateTime: { type: Date, required: true },
+  Status: { 
+    type: String, 
+    enum: ['Completed', 'In Progress', 'Pending'], 
+    required: true 
   },
-  action: {
-    type: String,
-    required: true,
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now,
-  },
+  Artifacts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Artifact' }],
+  CreatedBy: { type: String, required: true },
+  UpdatedBy: { type: String },
+  CreatedOn: { type: Date, default: Date.now },
+  UpdatedOn: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('AuditTrail', AuditTrailSchema);
+module.exports = mongoose.model('AuditCycle', AuditCycleSchema);
