@@ -13,8 +13,6 @@ const AuditCycleSchema = new mongoose.Schema({
   artifacts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Artifact' }],
   createdBy: { type: String, required: true },
   updatedBy: { type: String },
-  createdOn: { type: Date, default: Date.now },
-  updatedOn: { type: Date, default: Date.now },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('AuditCycle', AuditCycleSchema);
