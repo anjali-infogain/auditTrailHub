@@ -12,23 +12,36 @@ passport.use(
       clientID: process.env.AZURE_AD_CLIENT_ID,
       responseType: 'code',
       responseMode: 'query',
-      redirectUrl: 'http://localhost:3000/auth/callback',
+      redirectUrl: process.env.AZURE_AD_REDIRECT_URI,
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
-      allowHttpForRedirectUrl: true,
+      allowHttpForRedirectUrl: process.env.NODE_ENV !== 'production',
+      scope: ['openid', 'profile', 'email', 'User.Read'], // Add required scopes
       passReqToCallback: false,
     },
-    (iss, sub, profile, accessToken, refreshToken, done) => {
+    async (iss, sub, profile, accessToken, refreshToken, done) => {
       if (!profile) return done(new Error('No profile found'), null);
-      return done(null, profile);
+
+      console.log('Azure AD Profile:', profile); // Debug output
+
+      // Fetch additional user details using Microsoft Graph API
+      const user = {
+        id: profile.oid || profile.sub,
+        displayName: profile.displayName || profile.name || '',
+        email: profile._json.email || profile._json.preferred_username || '',
+        accessToken
+      };
+
+      return done(null, user);
     }
   )
 );
 
+// Serialize & Deserialize User
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
 
+// Authentication Configuration
 const configureAuthentication = (app) => {
-  // Session configuration
   app.use(
     session({
       secret: process.env.SESSION_SECRET,
@@ -36,31 +49,32 @@ const configureAuthentication = (app) => {
       saveUninitialized: true,
     })
   );
-
-  // Initialize Passport
   app.use(passport.initialize());
   app.use(passport.session());
 
   // Authentication Routes
   app.get('/auth/login', passport.authenticate('azuread-openidconnect', { failureRedirect: '/' }));
+
   app.get(
     '/auth/callback',
-    passport.authenticate('azuread-openidconnect', { failureRedirect: '/' }),
+    passport.authenticate('azuread-openidconnect', { failureRedirect: '/auth/error' }),
     (req, res) => {
       res.redirect('/dashboard');
     }
   );
+
+  // Logout
   app.get('/auth/logout', (req, res) => {
     req.session.destroy(() => {
       res.redirect('/');
     });
   });
+
+  // Error Route
+  app.get('/auth/error', (req, res) => {
+    res.send('<h1>Authentication Failed</h1><p>Please try again or contact support.</p>');
+  });
 };
 
-// Middleware to protect routes
-const isAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) return next();
-  res.redirect('/auth/login');
-};
 
-module.exports = { configureAuthentication, isAuthenticated };
+module.exports = { configureAuthentication };

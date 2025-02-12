@@ -4,7 +4,9 @@ const morgan = require("morgan");
 const dotenv = require("dotenv");
 const connectDB = require("./db");
 const auditTrailRoutes = require("./routes/auditCycle");
-// const { configureAuthentication, isAuthenticated } = require('./config/auth');
+const artifactRoutes = require("./routes/artifacts");
+const { configureAuthentication } = require("./config/auth");
+const isAuthenticated = require("./middleware/auth");
 
 dotenv.config();
 connectDB(); // Connect to MongoDB
@@ -17,15 +19,16 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Configure authentication
-// configureAuthentication(app);
+configureAuthentication(app);
 
 // Routes
 app.use("/audit", auditTrailRoutes);
+app.use("/artifacts", artifactRoutes);
 
 app.get("/", (req, res) => res.send("Welcome to AuditTrailHub!"));
-// app.get('/dashboard', isAuthenticated, (req, res) =>
-//   res.send(`Hello, ${req.user.displayName}!`)
-// );
+app.get("/dashboard", isAuthenticated, (req, res) => {
+  res.send(`Hello, ${req.user.displayName}!`);
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
