@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const ArtifactSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  name: { type: String, required: true, unique: true },
   description: { type: String },
   status: {
     type: String,
@@ -9,8 +9,8 @@ const ArtifactSchema = new mongoose.Schema({
     required: true,
   },
   commentIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }], // Foreign Key reference to Comment
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // User ID reference
-  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // User ID reference
+  createdBy: { type: mongoose.Schema.Types.String, ref: 'User', required: true }, // User ID reference
+  updatedBy: { type: mongoose.Schema.Types.String, ref: 'User' }, // User ID reference
 }, { timestamps: true }); // Automatically manages createdAt and updatedAt
 
 module.exports = mongoose.model('Artifact', ArtifactSchema);

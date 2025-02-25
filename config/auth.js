@@ -2,6 +2,8 @@ const passport = require('passport');
 const OIDCStrategy = require('passport-azure-ad').OIDCStrategy;
 const session = require('express-session');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
+const User = require('../models/User'); // Import User model
 
 dotenv.config();
 
@@ -15,32 +17,51 @@ passport.use(
       redirectUrl: process.env.AZURE_AD_REDIRECT_URI,
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
       allowHttpForRedirectUrl: process.env.NODE_ENV !== 'production',
-      scope: ['openid', 'profile', 'email', 'User.Read'], // Add required scopes
+      scope: ['openid', 'profile', 'email', 'User.Read'],
       passReqToCallback: false,
     },
     async (iss, sub, profile, accessToken, refreshToken, done) => {
       if (!profile) return done(new Error('No profile found'), null);
+      
+      console.log('Azure AD Profile:', profile);
+      console.log('Access Token:', accessToken);
 
-      console.log('Azure AD Profile:', profile); // Debug output
+      try {
+        const { oid, displayName, preferred_username } = profile;
+        const email = profile._json.email || preferred_username || '';
 
-      // Fetch additional user details using Microsoft Graph API
-      const user = {
-        id: profile.oid || profile.sub,
-        displayName: profile.displayName || profile.name || '',
-        email: profile._json.email || profile._json.preferred_username || '',
-        accessToken
-      };
+        // Check if user exists in DB
+        let user = await User.findOne({ _id: oid });
 
-      return done(null, user);
+        if (!user) {
+          user = new User({
+            _id: oid, // Azure AD ID as MongoDB ID
+            firstName: displayName ? displayName.split(' ')[0] : '',
+            lastName: displayName ? displayName.split(' ')[1] : '',
+            email,
+            password: null, // No password needed for SSO
+            role: 'Viewer', // Default role, change as needed
+            createdBy: oid,
+            updatedBy: oid,
+          });
+          await user.save();
+          console.log('New user registered:', user);
+        } else {
+          console.log('User already exists:', user);
+        }
+
+        return done(null, user);
+      } catch (error) {
+        console.error('SSO Registration Error:', error);
+        return done(error, null);
+      }
     }
   )
 );
 
-// Serialize & Deserialize User
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
 
-// Authentication Configuration
 const configureAuthentication = (app) => {
   app.use(
     session({
@@ -52,29 +73,35 @@ const configureAuthentication = (app) => {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Authentication Routes
-  app.get('/auth/login', passport.authenticate('azuread-openidconnect', { failureRedirect: '/' }));
+  app.get(
+    '/auth/login',
+    passport.authenticate('azuread-openidconnect', {
+      failureRedirect: '/',
+      scope: ['openid', 'profile', 'email', 'User.Read'],
+    })
+  );
 
   app.get(
     '/auth/callback',
-    passport.authenticate('azuread-openidconnect', { failureRedirect: '/auth/error' }),
+    passport.authenticate('azuread-openidconnect', {
+      failureRedirect: '/auth/error',
+    }),
     (req, res) => {
       res.redirect('/dashboard');
     }
   );
 
-  // Logout
   app.get('/auth/logout', (req, res) => {
     req.session.destroy(() => {
-      res.redirect('/');
+      res.redirect(
+        `https://login.microsoftonline.com/${process.env.AZURE_AD_TENANT_ID}/oauth2/v2.0/logout?post_logout_redirect_uri=${process.env.AZURE_AD_REDIRECT_URI}`
+      );
     });
   });
 
-  // Error Route
   app.get('/auth/error', (req, res) => {
     res.send('<h1>Authentication Failed</h1><p>Please try again or contact support.</p>');
   });
 };
-
 
 module.exports = { configureAuthentication };

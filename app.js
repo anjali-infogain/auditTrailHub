@@ -27,7 +27,7 @@ app.use("/artifacts", artifactRoutes);
 
 app.get("/", (req, res) => res.send("Welcome to AuditTrailHub!"));
 app.get("/dashboard", isAuthenticated, (req, res) => {
-  res.send(`Hello, ${req.user.displayName}!`);
+  res.send(`Hello, ${req.user.firstName}!`);
 });
 
 const PORT = process.env.PORT || 3000;
