@@ -86,7 +86,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
  */
 router.get("/", async (req, res) => {
   try {
-    const artifacts = await Artifact.find().populate("createdBy updatedBy");
+    const artifacts = await Artifact.find().populate("createdBy updatedBy", "firstName lastName");
     res.json({ artifacts });
   } catch (error) {
     console.error("Fetch error:", error);
@@ -99,9 +99,7 @@ router.get("/", async (req, res) => {
  */
 router.get("/:id", isAuthenticated, async (req, res) => {
   try {
-    const artifact = await Artifact.findById(req.params.id).populate(
-      "createdBy updatedBy"
-    );
+    const artifact = await Artifact.findById(req.params.id).populate("createdBy updatedBy", "firstName lastName");
     if (!artifact) return res.status(404).json({ error: "Artifact not found" });
 
     res.json({ artifact });
