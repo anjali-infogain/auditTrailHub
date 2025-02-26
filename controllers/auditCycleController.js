@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const AuditCycle = require('../models/AuditCycles');
+const constants = require('../utils/constants');
+const responseHandler = require('../utils/responseHandler');
 
 // Fetch all audit cycles
 router.get('/', async (req, res) => {
@@ -16,8 +18,10 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const auditCycle = await AuditCycle.findById(req.params.id)
-    .populate('createdBy updatedBy', 'firstName lastName');
+    const auditCycle = await AuditCycle.findById(req.params.id).populate(
+      'createdBy updatedBy',
+      'firstName lastName'
+    );
 
     if (!auditCycle) {
       return res.status(404).json({ message: 'AuditCycle not found' });

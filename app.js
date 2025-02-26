@@ -1,12 +1,11 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const morgan = require("morgan");
-const dotenv = require("dotenv");
-const connectDB = require("./db");
-const auditTrailRoutes = require("./routes/auditCycle");
-const artifactRoutes = require("./routes/artifacts");
-const { configureAuthentication } = require("./config/auth");
-const isAuthenticated = require("./middleware/auth");
+const express = require('express');
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const dotenv = require('dotenv');
+const connectDB = require('./db');
+const { configureAuthentication } = require('./config/auth');
+const isAuthenticated = require('./middleware/auth');
+const routes = require('./routes');
 
 dotenv.config();
 connectDB(); // Connect to MongoDB
@@ -14,7 +13,7 @@ connectDB(); // Connect to MongoDB
 const app = express();
 
 // Middleware
-app.use(morgan("dev"));
+app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -22,11 +21,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 configureAuthentication(app);
 
 // Routes
-app.use("/audit", auditTrailRoutes);
-app.use("/artifacts", artifactRoutes);
+app.use('/api', routes);
 
-app.get("/", (req, res) => res.send("Welcome to AuditTrailHub!"));
-app.get("/dashboard", isAuthenticated, (req, res) => {
+app.get('/', (req, res) => res.send('Welcome to auditCycleHub!'));
+app.get('/dashboard', isAuthenticated, (req, res) => {
   res.send(`Hello, ${req.user.firstName}!`);
 });
 
