@@ -23,15 +23,31 @@ const accessTokenG =
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {
     const accessToken = accessTokenG; // Add logic to get token
-    if (!accessToken)
-      return res.status(401).json({ error: 'User not authenticated' });
+    if (!accessToken) {
+      return responseHandler.error(
+        res,
+        constants.RESPONSE_MESSAGES.UNAUTHORIZED,
+        constants.STATUS_CODES.UNAUTHORIZED
+      );
+    }
 
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    if (!req.file) {
+      return responseHandler.error(
+        res,
+        constants.RESPONSE_MESSAGES.BAD_REQUEST,
+        constants.STATUS_CODES.NO_FILE_ADDED
+      );
+    }
 
     const { description, status, auditCycleId } = req.body;
 
-    if (!auditCycleId || !mongoose.Types.ObjectId.isValid(auditCycleId))
-      return res.status(400).json({ error: 'Audit Cycle is missing' });
+    if (!auditCycleId || !mongoose.Types.ObjectId.isValid(auditCycleId)) {
+      return responseHandler.error(
+        res,
+        constants.RESPONSE_MESSAGES.AUDIT_CYCLE_ID_MISSING,
+        constants.STATUS_CODES.NO_FILE_ADDED
+      );
+    }
 
     const fileBuffer = req.file.buffer;
     const originalFileName = req.file.originalname;
@@ -69,16 +85,25 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       auditCycle.artifacts.push(newArtifact._id); // Push new artifact ID
       await auditCycle.save();
     } else {
-      return res.status(404).json({ error: 'AuditCycle not found' });
+      return responseHandler.error(
+        res,
+        constants.RESPONSE_MESSAGES.NOT_FOUND,
+        constants.STATUS_CODES.AUDIT_CYCLE_NOT_FOUND
+      );
     }
-
-    res.status(201).json({
-      message: 'File uploaded & artifact created',
-      artifact: newArtifact,
-    });
+    return responseHandler.success(
+      res,
+      constants.RESPONSE_MESSAGES.ARTIFACT_CREATE_SUCCESS,
+      auditCycle,
+      constants.STATUS_CODES.CREATED
+    );
   } catch (error) {
     console.error('Upload error:', error.response?.data || error);
-    res.status(500).json({ error: 'File upload failed' });
+    return responseHandler.error(
+      res,
+      constants.RESPONSE_MESSAGES.SERVER_ERROR,
+      constants.STATUS_CODES.SERVER_ERROR
+    );
   }
 });
 
@@ -94,7 +119,11 @@ router.get('/', async (req, res) => {
     res.json({ artifacts });
   } catch (error) {
     console.error('Fetch error:', error);
-    res.status(500).json({ error: 'Failed to fetch artifacts' });
+    return responseHandler.error(
+      res,
+      constants.RESPONSE_MESSAGES.SERVER_ERROR,
+      constants.STATUS_CODES.SERVER_ERROR
+    );
   }
 });
 
@@ -107,12 +136,25 @@ router.get('/:id', isAuthenticated, async (req, res) => {
       'createdBy updatedBy',
       'firstName lastName'
     );
-    if (!artifact) return res.status(404).json({ error: 'Artifact not found' });
-
-    res.json({ artifact });
+    if (!artifact) {
+      return responseHandler.error(
+        res,
+        constants.RESPONSE_MESSAGES.NOT_FOUND,
+        constants.STATUS_CODES.NOT_FOUND
+      );
+    }
+    return responseHandler.success(
+      res,
+      constants.RESPONSE_MESSAGES.SUCCESS,
+      artifact
+    );
   } catch (error) {
     console.error('Fetch error:', error);
-    res.status(500).json({ error: 'Failed to fetch artifact' });
+    return responseHandler.error(
+      res,
+      constants.RESPONSE_MESSAGES.SERVER_ERROR,
+      constants.STATUS_CODES.SERVER_ERROR
+    );
   }
 });
 
@@ -122,8 +164,13 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 router.get('/download/:fileName', async (req, res) => {
   try {
     const accessToken = accessTokenG;
-    if (!accessToken)
-      return res.status(401).json({ error: 'User not authenticated' });
+    if (!accessToken) {
+      return responseHandler.error(
+        res,
+        constants.RESPONSE_MESSAGES.UNAUTHORIZED,
+        constants.STATUS_CODES.UNAUTHORIZED
+      );
+    }
 
     const fileName = req.params.fileName;
     const downloadUrl = `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_SITE_ID}/drives/${DRIVE_ID}/root:/artifacts/${fileName}:/content`;
@@ -137,7 +184,11 @@ router.get('/download/:fileName', async (req, res) => {
     response.data.pipe(res);
   } catch (error) {
     console.error('Download error:', error.response?.data || error);
-    res.status(500).json({ error: 'Failed to download file' });
+    return responseHandler.error(
+      res,
+      constants.RESPONSE_MESSAGES.SERVER_ERROR,
+      constants.STATUS_CODES.SERVER_ERROR
+    );
   }
 });
 
@@ -148,7 +199,13 @@ router.put('/:id', isAuthenticated, upload.single('file'), async (req, res) => {
   try {
     const { name, description, status } = req.body;
     const artifact = await Artifact.findById(req.params.id);
-    if (!artifact) return res.status(404).json({ error: 'Artifact not found' });
+    if (!artifact) {
+      return responseHandler.error(
+        res,
+        constants.RESPONSE_MESSAGES.NOT_FOUND,
+        constants.STATUS_CODES.NOT_FOUND
+      );
+    }
 
     artifact.name = name || artifact.name;
     artifact.description = description || artifact.description;
@@ -169,10 +226,18 @@ router.put('/:id', isAuthenticated, upload.single('file'), async (req, res) => {
     }
 
     await artifact.save();
-    res.json({ message: 'Artifact updated', artifact });
+    return responseHandler.success(
+      res,
+      constants.RESPONSE_MESSAGES.SUCCESS,
+      artifact
+    );
   } catch (error) {
     console.error('Update error:', error.response?.data || error);
-    res.status(500).json({ error: 'Update failed' });
+    return responseHandler.error(
+      res,
+      constants.RESPONSE_MESSAGES.SERVER_ERROR,
+      constants.STATUS_CODES.SERVER_ERROR
+    );
   }
 });
 
@@ -182,7 +247,13 @@ router.put('/:id', isAuthenticated, upload.single('file'), async (req, res) => {
 router.delete('/:id', isAuthenticated, async (req, res) => {
   try {
     const artifact = await Artifact.findById(req.params.id);
-    if (!artifact) return res.status(404).json({ error: 'Artifact not found' });
+    if (!artifact) {
+      return responseHandler.error(
+        res,
+        constants.RESPONSE_MESSAGES.NOT_FOUND,
+        constants.STATUS_CODES.NOT_FOUND
+      );
+    }
 
     // Delete file from SharePoint
     const accessToken = getUserAccessToken(req);
@@ -194,11 +265,17 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
 
     // Delete from MongoDB
     await artifact.deleteOne();
-
-    res.json({ message: 'Artifact deleted' });
+    return responseHandler.success(
+      res,
+      constants.RESPONSE_MESSAGES.ARTIFACT_DELETED,
+    );
   } catch (error) {
     console.error('Delete error:', error.response?.data || error);
-    res.status(500).json({ error: 'Delete failed' });
+    return responseHandler.error(
+      res,
+      constants.RESPONSE_MESSAGES.SERVER_ERROR,
+      constants.STATUS_CODES.SERVER_ERROR
+    );
   }
 });
 

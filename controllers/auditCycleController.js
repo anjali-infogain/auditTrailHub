@@ -10,9 +10,18 @@ router.get('/', async (req, res) => {
     const auditCycle = await AuditCycle.find()
       .sort({ updatedAt: -1 })
       .populate('createdBy updatedBy', 'firstName lastName');
-    res.json(auditCycle);
+    return responseHandler.success(
+      res,
+      constants.RESPONSE_MESSAGES.SUCCESS,
+      auditCycle
+    );
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    console.error(err);
+    return responseHandler.error(
+      res,
+      constants.RESPONSE_MESSAGES.SERVER_ERROR,
+      constants.STATUS_CODES.SERVER_ERROR
+    );
   }
 });
 
@@ -24,13 +33,25 @@ router.get('/:id', async (req, res) => {
     );
 
     if (!auditCycle) {
-      return res.status(404).json({ message: 'AuditCycle not found' });
+      return responseHandler.error(
+        res,
+        constants.RESPONSE_MESSAGES.NOT_FOUND,
+        constants.STATUS_CODES.NOT_FOUND
+      );
     }
 
-    res.status(200).json(auditCycle);
+    return responseHandler.success(
+      res,
+      constants.RESPONSE_MESSAGES.SUCCESS,
+      auditCycle
+    );
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error', error: error.message });
+    return responseHandler.error(
+      res,
+      constants.RESPONSE_MESSAGES.SERVER_ERROR,
+      constants.STATUS_CODES.SERVER_ERROR
+    );
   }
 });
 
@@ -40,13 +61,23 @@ router.delete('/:id', async (req, res) => {
     const auditCycle = await AuditCycle.findByIdAndDelete(req.params.id);
 
     if (!auditCycle) {
-      return res.status(404).json({ message: 'AuditCycle not found' });
+      return responseHandler.error(
+        res,
+        constants.RESPONSE_MESSAGES.NOT_FOUND,
+        constants.STATUS_CODES.NOT_FOUND
+      );
     }
-
-    res.status(200).json({ message: 'AuditCycle deleted successfully' });
+    return responseHandler.success(
+      res,
+      constants.RESPONSE_MESSAGES.AUDIT_CYCLE_DELETE_SUCCESS
+    );
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error', error: error.message });
+    return responseHandler.error(
+      res,
+      constants.RESPONSE_MESSAGES.SERVER_ERROR,
+      constants.STATUS_CODES.SERVER_ERROR
+    );
   }
 });
 
@@ -57,10 +88,19 @@ router.post('/', async (req, res) => {
       ...req.body,
     });
     await newLog.save();
-    res.status(201).json({ message: 'Audit cycle added', log: newLog });
+    return responseHandler.success(
+      res,
+      constants.RESPONSE_MESSAGES.AUDIT_CYCLE_CREATED,
+      newLog,
+      constants.STATUS_CODES.CREATED
+    );
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: 'Failed to save audit cycle' });
+    return responseHandler.error(
+      res,
+      constants.RESPONSE_MESSAGES.AUDIT_CYCLE_SAVE_FAIL,
+      constants.STATUS_CODES.SERVER_ERROR
+    );
   }
 });
 
@@ -74,13 +114,25 @@ router.put('/:id', async (req, res) => {
     );
 
     if (!updatedAuditCycle) {
-      return res.status(404).json({ message: 'AuditCycle not found' });
+      return responseHandler.error(
+        res,
+        constants.RESPONSE_MESSAGES.NOT_FOUND,
+        constants.STATUS_CODES.NOT_FOUND
+      );
     }
 
-    res.status(200).json(updatedAuditCycle);
+    return responseHandler.success(
+      res,
+      constants.RESPONSE_MESSAGES.SUCCESS,
+      updatedAuditCycle
+    );
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server Error', error: error.message });
+    return responseHandler.error(
+      res,
+      constants.RESPONSE_MESSAGES.SERVER_ERROR,
+      constants.STATUS_CODES.SERVER_ERROR
+    );
   }
 });
 

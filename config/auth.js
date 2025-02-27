@@ -2,7 +2,6 @@ const passport = require('passport');
 const OIDCStrategy = require('passport-azure-ad').OIDCStrategy;
 const session = require('express-session');
 const dotenv = require('dotenv');
-const mongoose = require('mongoose');
 const User = require('../models/User'); // Import User model
 
 dotenv.config();
