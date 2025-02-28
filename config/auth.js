@@ -22,7 +22,6 @@ passport.use(
     async (iss, sub, profile, accessToken, refreshToken, done) => {
       if (!profile) return done(new Error('No profile found'), null);
       
-      console.log('Azure AD Profile:', profile);
       console.log('Access Token:', accessToken);
 
       try {
@@ -44,9 +43,6 @@ passport.use(
             updatedBy: oid,
           });
           await user.save();
-          console.log('New user registered:', user);
-        } else {
-          console.log('User already exists:', user);
         }
 
         return done(null, user);

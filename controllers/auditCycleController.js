@@ -95,7 +95,7 @@ router.post('/', async (req, res) => {
       constants.STATUS_CODES.CREATED
     );
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return responseHandler.error(
       res,
       constants.RESPONSE_MESSAGES.AUDIT_CYCLE_SAVE_FAIL,
