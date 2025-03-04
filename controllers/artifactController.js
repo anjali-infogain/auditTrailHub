@@ -15,7 +15,7 @@ const { generateUniqueFileName } = require('../utils/commonUtils');
 const SHAREPOINT_SITE_ID = process.env.SHAREPOINT_SITE_ID;
 const DRIVE_ID = process.env.DRIVE_ID;
 const accessTokenG =
-  'eyJ0eXAiOiJKV1QiLCJub25jZSI6Im9NeXk0bDlSbnp2bFVaS3JpVUZmOTZlekkxQ3dhLUluWXhrMmRCaUVSVTAiLCJhbGciOiJSUzI1NiIsIng1dCI6ImltaTBZMnowZFlLeEJ0dEFxS19UdDVoWUJUayIsImtpZCI6ImltaTBZMnowZFlLeEJ0dEFxS19UdDVoWUJUayJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zZjdmNTJjNy0wN2IyLTRjYjEtYTA3YS00OTYyNTYwMjFlNmYvIiwiaWF0IjoxNzQwNzMyMDQ2LCJuYmYiOjE3NDA3MzIwNDYsImV4cCI6MTc0MDczNjE0MywiYWNjdCI6MCwiYWNyIjoiMSIsImFjcnMiOlsicDEiXSwiYWlvIjoiQWJRQVMvOFpBQUFBdVJGejV6QWRyZ3BiS3pNekF5S29hU2kwczVReFJrRklZQ1R0K3JtRFIwaGtBQ28xSkdmdk8yc2FsZkN4Z3ZUeVBiNTRWYWVMbGRERVVWdStOS1VsNm5kYTR1QlZ6L2J0TmxGMVpOVHF0R2ZwcHVOV2JIbmhNQTN6SytWVjNFbVZ6L2RpWFFiR2F1bWlUQWJFYzhjSisvVVNyNWxkejV2NXN5alhEbElIaFh6N1B3YlJTazhydUR6WHpZLy9MOCtPcWppdXBHakw1QU5oc3JnSGptMjdLSVFWbCtrcXZzeW1Zbk01Y3hYZVpmWT0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcF9kaXNwbGF5bmFtZSI6IkF1ZGl0VHJhaWxIdWIiLCJhcHBpZCI6IjE0NWVlZDkxLTMxZDctNDdhNS04NzM2LWU4MGI0ZTNjOTdmZiIsImFwcGlkYWNyIjoiMSIsImZhbWlseV9uYW1lIjoiUGFuZHlhIiwiZ2l2ZW5fbmFtZSI6IkFuamFsaSIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjU4Ljg0LjYyLjE1MiIsIm5hbWUiOiJBbmphbGkgUGFuZHlhIiwib2lkIjoiNDVhYTYwOWQtN2E2My00M2I1LTgzOGYtNzZiM2Q4MDcwZmY2Iiwib25wcmVtX3NpZCI6IlMtMS01LTIxLTg1NDI0NTM5OC0xNzk2MDUzNjItNjgyMDAzMzMwLTc0OTA5IiwicGxhdGYiOiI4IiwicHVpZCI6IjEwMDMyMDAyMERFNzIxNzciLCJyaCI6IjEuQVZRQXgxSl9QN0lIc1V5Z2VrbGlWZ0llYndNQUFBQUFBQUFBd0FBQUFBQUFBQUJVQUVaVUFBLiIsInNjcCI6IkZpbGVzLlJlYWRXcml0ZS5BbGwgU2l0ZXMuTWFuYWdlLkFsbCBTaXRlcy5SZWFkV3JpdGUuQWxsIFVzZXIuUmVhZCBwcm9maWxlIG9wZW5pZCBlbWFpbCIsInNpZCI6IjAwMjFjMGI5LTJiZTMtYmMwZS04ZWVmLWUwZmIxN2E5YTBiOSIsInNpZ25pbl9zdGF0ZSI6WyJrbXNpIl0sInN1YiI6Im1rNi1CTEZzT3VUWFU1NHFuVVpjNS1mbXVWWksyeWxJZXhIbTB4V281ZFUiLCJ0ZW5hbnRfcmVnaW9uX3Njb3BlIjoiQVMiLCJ0aWQiOiIzZjdmNTJjNy0wN2IyLTRjYjEtYTA3YS00OTYyNTYwMjFlNmYiLCJ1bmlxdWVfbmFtZSI6IkFuamFsaS5QYW5keWFAaWdnbG9iYWwuY29tIiwidXBuIjoiQW5qYWxpLlBhbmR5YUBpZ2dsb2JhbC5jb20iLCJ1dGkiOiJyTGpHaEl1NncwLUZlajJldTRNRkFBIiwidmVyIjoiMS4wIiwid2lkcyI6WyJiNzlmYmY0ZC0zZWY5LTQ2ODktODE0My03NmIxOTRlODU1MDkiXSwieG1zX2Z0ZCI6Imk5WlJBSEE0QnZIM0tMU2RBVktWY3JvcWV1Z2g4NFJPSmttY3BfXzk5akUiLCJ4bXNfaWRyZWwiOiIxIDI0IiwieG1zX3N0Ijp7InN1YiI6IlhhSjJqTmRtcTIxREFGVlYzWWlNY1NLbFlraVkyQUlhVEg1Tml0UFpxYUkifSwieG1zX3RjZHQiOjE0MzE3OTczNzZ9.c8NQknAp7sS1jy03eM12qr9ysA8bc_Ioh-7syv9GvEfIIhWsz7G4x1xLd4trQdbMpwqrLVEfRGEBgGWm3WC3tZ0ue2jJO8A-pzmZRJ7X6HWGCZY2SGq0ttwYbMgPizfzGa5X8ZY3WY8UqNfb9YVKKxEzPQdoso6I8u3qP4fuJQkKGYNMq6J4NO7FQ9jBSvYCwoD8j4hFgEBJroLkOZ_W0pvFLbRamFywOYIeaY1RijayxqzcsEI3dkQQHbxv8xKUBXoNgIvHFpWgkDmmh_bwm5rpXI7uwLkYT1sbM752gVG2KKmpHzwUwypsjkY_fbvoq1xlRWVStNw78V_muHBMDA';
+  'eyJ0eXAiOiJKV1QiLCJub25jZSI6IjBxa2I0UFNtYlc1a3ZQLUE5dE5KVnZfaUpSZWZTeGRJcWlGMWNpcEFxV2ciLCJhbGciOiJSUzI1NiIsIng1dCI6ImltaTBZMnowZFlLeEJ0dEFxS19UdDVoWUJUayIsImtpZCI6ImltaTBZMnowZFlLeEJ0dEFxS19UdDVoWUJUayJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8zZjdmNTJjNy0wN2IyLTRjYjEtYTA3YS00OTYyNTYwMjFlNmYvIiwiaWF0IjoxNzQxMDczODgyLCJuYmYiOjE3NDEwNzM4ODIsImV4cCI6MTc0MTA3ODQ2NCwiYWNjdCI6MCwiYWNyIjoiMSIsImFjcnMiOlsicDEiXSwiYWlvIjoiQWJRQVMvOFpBQUFBVXNCWGNHL3dHcU1YcURlcVpSTTVhZnpVelpKVjI4alY0MGdBODlEMUxmNDBidUpCOVYxTzJZZnZOVzRsMG5MM0JUcEVoTXNWRkxmSDUrV0g5MlVYNTFndEg2UTNQNjhxbnhLVW13Q0U1dTg1Z0FTdlEyZUV4bUdCZTIxNW1pSVkwdGpuSWhyckhPR3ZOTjF3dWFvaSs5eU9aczlXV28wQ2xPWklFYTIwMENnRFl1bE1nUXJwWHBFa2t4NE1SUHg3YVB1L3ljTnlhUVRZL2dqSW5NNmZhRWUyWnd3alZ5TDZXa0IyQXVMT0Ywbz0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcF9kaXNwbGF5bmFtZSI6IkF1ZGl0VHJhaWxIdWIiLCJhcHBpZCI6IjE0NWVlZDkxLTMxZDctNDdhNS04NzM2LWU4MGI0ZTNjOTdmZiIsImFwcGlkYWNyIjoiMSIsImZhbWlseV9uYW1lIjoiUGFuZHlhIiwiZ2l2ZW5fbmFtZSI6IkFuamFsaSIsImlkdHlwIjoidXNlciIsImlwYWRkciI6IjI0MDI6ZTI4MDozZTM5OjVjNjo0ODkyOjRhNjk6MTliNDpmOWI1IiwibmFtZSI6IkFuamFsaSBQYW5keWEiLCJvaWQiOiI0NWFhNjA5ZC03YTYzLTQzYjUtODM4Zi03NmIzZDgwNzBmZjYiLCJvbnByZW1fc2lkIjoiUy0xLTUtMjEtODU0MjQ1Mzk4LTE3OTYwNTM2Mi02ODIwMDMzMzAtNzQ5MDkiLCJwbGF0ZiI6IjgiLCJwdWlkIjoiMTAwMzIwMDIwREU3MjE3NyIsInJoIjoiMS5BVlFBeDFKX1A3SUhzVXlnZWtsaVZnSWVid01BQUFBQUFBQUF3QUFBQUFBQUFBQlVBRVpVQUEuIiwic2NwIjoiRmlsZXMuUmVhZFdyaXRlLkFsbCBTaXRlcy5NYW5hZ2UuQWxsIFNpdGVzLlJlYWRXcml0ZS5BbGwgVXNlci5SZWFkIHByb2ZpbGUgb3BlbmlkIGVtYWlsIiwic2lkIjoiMDAyMWMwYjktMmJlMy1iYzBlLThlZWYtZTBmYjE3YTlhMGI5Iiwic2lnbmluX3N0YXRlIjpbImttc2kiXSwic3ViIjoibWs2LUJMRnNPdVRYVTU0cW5VWmM1LWZtdVZaSzJ5bElleEhtMHhXbzVkVSIsInRlbmFudF9yZWdpb25fc2NvcGUiOiJBUyIsInRpZCI6IjNmN2Y1MmM3LTA3YjItNGNiMS1hMDdhLTQ5NjI1NjAyMWU2ZiIsInVuaXF1ZV9uYW1lIjoiQW5qYWxpLlBhbmR5YUBpZ2dsb2JhbC5jb20iLCJ1cG4iOiJBbmphbGkuUGFuZHlhQGlnZ2xvYmFsLmNvbSIsInV0aSI6IkhxaldVOERYd1UyQk55U3ptYlpSQUEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbImI3OWZiZjRkLTNlZjktNDY4OS04MTQzLTc2YjE5NGU4NTUwOSJdLCJ4bXNfZnRkIjoiMms5dk1iNHY5c0xSNWVpZFNMQ3FiR201b3kwVjh5WUFiclBXUVRwQ1E1SSIsInhtc19pZHJlbCI6IjIyIDEiLCJ4bXNfc3QiOnsic3ViIjoiWGFKMmpOZG1xMjFEQUZWVjNZaU1jU0tsWWtpWTJBSWFUSDVOaXRQWnFhSSJ9LCJ4bXNfdGNkdCI6MTQzMTc5NzM3Nn0.QAgWe-pWF-1rpc-vp6rTabua1_TKy7bZoF3x2Z8M6-6mlsSF_RticpgPArVz6M49jJinzQgzXyK4P_ST0-sNc3ULs-3kYnUriWF-aApLF7mxjqIMV_Qe9xt06NmRJwJdQ2PJn8sVJ7e5YbN74hFrc_PywfRNq_onKocrQ_cF6FlmMB4HtOUraWoCzSCbFKZr52hbD433iJsnEo3MPwm31iD3LONJYojueNUfpWxQtzQR0zI9MGchMGKs4MnldJE3j7CYy0KV1HczlJu0BkvI0uZX5oQDR5oL4ki-RbeUMtXkRtV_uJB66necdocEL44c4i54N4zvaMlH_EHxKghaBg';
 /**
  * 📌 Upload an artifact (file) to SharePoint & store metadata in MongoDB
  */
@@ -169,8 +169,14 @@ router.get('/download/:fileName', async (req, res) => {
     }
 
     const fileName = req.params.fileName;
-    const downloadUrl = `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_SITE_ID}/drives/${DRIVE_ID}/root:/artifacts/${fileName}:/content`;
+    const versionId = req.query.versionId || null;
+    let downloadUrl;
 
+    if (versionId) {
+      downloadUrl = `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_SITE_ID}/drives/${DRIVE_ID}/root:/artifacts/${fileName}:/versions/${versionId}/content`;
+    } else {
+      downloadUrl = `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_SITE_ID}/drives/${DRIVE_ID}/root:/artifacts/${fileName}:/content`;
+    }
     const response = await axios.get(downloadUrl, {
       headers: { Authorization: `Bearer ${accessToken}` },
       responseType: 'stream',
@@ -202,7 +208,7 @@ router.put('/:id', upload.single('file'), async (req, res) => {
       );
     }
     const { description, status } = req.body;
-    
+
     // Fetch existing artifact
     const artifact = await Artifact.findById(req.params.id);
     if (!artifact) {
@@ -277,6 +283,47 @@ router.delete('/:id', async (req, res) => {
     );
   } catch (error) {
     console.error('Delete error:', error.response?.data || error);
+    return responseHandler.error(
+      res,
+      constants.RESPONSE_MESSAGES.SERVER_ERROR,
+      constants.STATUS_CODES.SERVER_ERROR
+    );
+  }
+});
+
+// API to Get File Version History
+router.get('/:name/versions', async (req, res) => {
+  try {
+    const fileName = req.params.name;
+    const accessToken = accessTokenG; // Use a valid access token
+
+    if (!accessToken) {
+      return responseHandler.error(
+        res,
+        constants.RESPONSE_MESSAGES.UNAUTHORIZED,
+        constants.STATUS_CODES.UNAUTHORIZED
+      );
+    }
+
+    // Construct the Microsoft Graph API URL
+    const url = `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_SITE_ID}/drives/${DRIVE_ID}/root:/artifacts/${fileName}:/versions`;
+
+    // Call Microsoft Graph API
+    const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    // Send version history as response
+    return responseHandler.success(
+      res,
+      constants.RESPONSE_MESSAGES.SUCCESS,
+      response.data
+    );
+  } catch (error) {
+    console.error(
+      'Error fetching file versions:',
+      error.response?.data || error
+    );
     return responseHandler.error(
       res,
       constants.RESPONSE_MESSAGES.SERVER_ERROR,
